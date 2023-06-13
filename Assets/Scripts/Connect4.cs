@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class Connect4 : MonoBehaviour
@@ -16,6 +17,7 @@ public class Connect4 : MonoBehaviour
     [SerializeField] private GameObject playingButtons;
 
     private string currentPlayer;
+    private string winner;
     private string gameMode;
     private bool alreadyPlayed;
 
@@ -44,7 +46,7 @@ public class Connect4 : MonoBehaviour
             if (currentPlayer == "Red" && !alreadyPlayed)
             {
                 playingButtons.SetActive(false);
-                Invoke(nameof(IAPlay), 1f); // if the gamemode is set to IA and if it's red's turn wait a sec and play
+                Invoke(nameof(IAPlay), 1.5f); // if the gamemode is set to IA and if it's red's turn wait a sec and play
                 alreadyPlayed = true;
             }
         }
@@ -64,11 +66,9 @@ public class Connect4 : MonoBehaviour
 
     private void IAPlay()
     {
-        Debug.Log("IA JUST PLAYED");
         // code for the AI to play
+        PlaceCoin(Random.Range(0, 7));
 
-        SwapPlayer();
-        
         playingButtons.SetActive(true);
         alreadyPlayed = false;
     }
@@ -92,6 +92,7 @@ public class Connect4 : MonoBehaviour
         return result;
     }
 
+    // changes the current player and displays it on the UI
     private void SwapPlayer()
     {
         if (currentPlayer == "Yellow")
@@ -102,7 +103,6 @@ public class Connect4 : MonoBehaviour
         {
             currentPlayer = "Yellow";
         }
-
         DisplayPlayer();
     }
 
@@ -111,6 +111,7 @@ public class Connect4 : MonoBehaviour
         playerDisplay.text = currentPlayer + " is playing";
     }
 
+    // spawn the token
     private GameObject SetCoinObject(string color, Vector3 position)
     {
         if (color == "Yellow")
@@ -163,7 +164,84 @@ public class Connect4 : MonoBehaviour
 
         if (debug) DisplayBoard();
 
+        if (CheckWin(currentPlayer))
+        {
+            winner = currentPlayer;
+            Invoke(nameof(WinGestion), 1f);
+        }
+
         SwapPlayer();
+    }
+
+    private void WinGestion()
+    {
+        PlayerPrefs.SetString("Winner", winner);
+        SceneManager.LoadScene("EndScreen");
+    }
+
+    private bool CheckWin(string player)
+    {
+        // Check horizontal
+        for (int row = 0; row < ROWS; row++)
+        {
+            for (int col = 0; col < COLUMNS - 3; col++)
+            {
+                if (board[row, col].GetColor() == player &&
+                    board[row, col + 1].GetColor() == player &&
+                    board[row, col + 2].GetColor() == player &&
+                    board[row, col + 3].GetColor() == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check vertical
+        for (int row = 0; row < ROWS - 3; row++)
+        {
+            for (int col = 0; col < COLUMNS; col++)
+            {
+                if (board[row, col].GetColor() == player &&
+                    board[row + 1, col].GetColor() == player &&
+                    board[row + 2, col].GetColor() == player &&
+                    board[row + 3, col].GetColor() == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check diagonal (ascending)
+        for (int row = 3; row < ROWS; row++)
+        {
+            for (int col = 0; col < COLUMNS - 3; col++)
+            {
+                if (board[row, col].GetColor() == player &&
+                    board[row - 1, col + 1].GetColor() == player &&
+                    board[row - 2, col + 2].GetColor() == player &&
+                    board[row - 3, col + 3].GetColor() == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check diagonal (descending)
+        for (int row = 0; row < ROWS - 3; row++)
+        {
+            for (int col = 0; col < COLUMNS - 3; col++)
+            {
+                if (board[row, col].GetColor() == player &&
+                    board[row + 1, col + 1].GetColor() == player &&
+                    board[row + 2, col + 2].GetColor() == player &&
+                    board[row + 3, col + 3].GetColor() == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     // debug fonction used to send the board as logs in the console
