@@ -38,7 +38,7 @@ public class Connect4 : MonoBehaviour
         currentPlayer = "Yellow";
         alreadyPlayed = false;
         IADifficulty = (PlayerPrefs.GetInt("Difficulty") + 1) * 2;
-        Debug.Log("Difficulty = " + IADifficulty);
+        //Debug.Log("Difficulty = " + IADifficulty);
         gameMode = PlayerPrefs.GetString("GameMode");
         DisplayPlayer();
         InitializeBoard();
