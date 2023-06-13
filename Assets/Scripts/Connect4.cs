@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.UIElements;
 
 public class Connect4 : MonoBehaviour
@@ -12,8 +13,11 @@ public class Connect4 : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private TMP_Text playerDisplay;
+    [SerializeField] private GameObject playingButtons;
 
     private string currentPlayer;
+    private string gameMode;
+    private bool alreadyPlayed;
 
     private const int ROWS = 7;
     private const int COLUMNS = 6;
@@ -26,6 +30,8 @@ public class Connect4 : MonoBehaviour
     private void Start()
     {
         currentPlayer = "Yellow";
+        alreadyPlayed = false;
+        gameMode = PlayerPrefs.GetString("GameMode");
         DisplayPlayer();
         InitializeBoard();
     }
@@ -33,7 +39,15 @@ public class Connect4 : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        
+        if(gameMode == "IA")
+        {
+            if (currentPlayer == "Red" && !alreadyPlayed)
+            {
+                playingButtons.SetActive(false);
+                Invoke(nameof(IAPlay), 1f); // if the gamemode is set to IA and if it's red's turn wait a sec and play
+                alreadyPlayed = true;
+            }
+        }
     }
 
     private void InitializeBoard()
@@ -46,6 +60,17 @@ public class Connect4 : MonoBehaviour
                 board[row, col] = new Cell();
             }
         }
+    }
+
+    private void IAPlay()
+    {
+        Debug.Log("IA JUST PLAYED");
+        // code for the AI to play
+
+        SwapPlayer();
+        
+        playingButtons.SetActive(true);
+        alreadyPlayed = false;
     }
 
     private Vector3 PositionIntToVector(int position)
@@ -77,6 +102,8 @@ public class Connect4 : MonoBehaviour
         {
             currentPlayer = "Yellow";
         }
+
+        DisplayPlayer();
     }
 
     private void DisplayPlayer()
@@ -137,7 +164,6 @@ public class Connect4 : MonoBehaviour
         if (debug) DisplayBoard();
 
         SwapPlayer();
-        DisplayPlayer();
     }
 
     // debug fonction used to send the board as logs in the console

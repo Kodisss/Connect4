@@ -2377,6 +2377,7 @@ MonoBehaviour:
   yellowCoin: {fileID: 3807219516418865522, guid: f981fa7f2aa362b44bdb91bd1896d1fa, type: 3}
   redCoin: {fileID: 3807219516418865522, guid: 4bfce923acb6f4043b766e8dc6f2a5ef, type: 3}
   playerDisplay: {fileID: 2147142177}
+  playingButtons: {fileID: 1785569365}
   debug: 0
 --- !u!1 &1723273131
 GameObject:
