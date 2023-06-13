@@ -394,6 +394,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1664662650}
+  - component: {fileID: 1664662651}
   m_Layer: 0
   m_Name: Connect 4 Game
   m_TagString: Untagged
@@ -416,6 +417,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1664662651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1664662649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d472f9d275854b344b9166b032b54222, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  yellowCoin: {fileID: 3807219516418865522, guid: f981fa7f2aa362b44bdb91bd1896d1fa, type: 3}
+  redCoin: {fileID: 3807219516418865522, guid: 4bfce923acb6f4043b766e8dc6f2a5ef, type: 3}
 --- !u!1001 &7908723076158666985
 PrefabInstance:
   m_ObjectHideFlags: 0
