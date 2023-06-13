@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,24 +10,24 @@ public class Connect4 : MonoBehaviour
     [SerializeField] private GameObject yellowCoin;
     [SerializeField] private GameObject redCoin;
 
+    [Header("UI")]
+    [SerializeField] private TMP_Text playerDisplay;
+
     private string currentPlayer;
 
     private const int ROWS = 7;
-    private const int COLUMNS = 7;
+    private const int COLUMNS = 6;
 
     private Cell[,] board = new Cell[ROWS, COLUMNS];
+
+    [SerializeField] private bool debug;
 
     // Start is called before the first frame update
     private void Start()
     {
         currentPlayer = "Yellow";
+        DisplayPlayer();
         InitializeBoard();
-        PlaceCoin(3);
-        PlaceCoin(3);
-        PlaceCoin(4);
-        PlaceCoin(0);
-        DisplayBoard();
-        Invoke(nameof(ResetBoard), 5f);
     }
 
     // Update is called once per frame
@@ -78,6 +79,11 @@ public class Connect4 : MonoBehaviour
         }
     }
 
+    private void DisplayPlayer()
+    {
+        playerDisplay.text = currentPlayer + " is playing";
+    }
+
     private GameObject SetCoinObject(string color, Vector3 position)
     {
         if (color == "Yellow")
@@ -90,7 +96,7 @@ public class Connect4 : MonoBehaviour
         }
     }
 
-    private void ResetBoard()
+    public void ResetBoard()
     {
         for (int row = 0; row < ROWS; row++)
         {
@@ -113,6 +119,8 @@ public class Connect4 : MonoBehaviour
     {
         int col = 0;
 
+        if (!board[row, COLUMNS-1].IsValid()) return;
+
         for (int i = 0; i < COLUMNS; i++)
         {
             if(board[row, i].IsValid())
@@ -126,7 +134,10 @@ public class Connect4 : MonoBehaviour
         board[row, col].PlaceColor(currentPlayer);
         board[row, col].coin = SetCoinObject(currentPlayer, PositionIntToVector(row));
 
+        if (debug) DisplayBoard();
+
         SwapPlayer();
+        DisplayPlayer();
     }
 
     // debug fonction used to send the board as logs in the console
@@ -136,7 +147,7 @@ public class Connect4 : MonoBehaviour
         {
             for (int col = 0; col < COLUMNS; col++)
             {
-                Debug.Log(board[row, col].GetColor());
+                Debug.Log("Board[" + row + " ; " + col + "] = " + board[row, col].GetColor());
             }
         }
     }
