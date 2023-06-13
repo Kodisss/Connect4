@@ -41,3 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Coin
+    uniqueID: 699965709
+    locked: 0
+  - name: GameMap
+    uniqueID: 475042549
+    locked: 0
