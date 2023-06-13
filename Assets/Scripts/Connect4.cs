@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
@@ -21,8 +22,8 @@ public class Connect4 : MonoBehaviour
     private string gameMode;
     private bool alreadyPlayed;
 
-    private const int ROWS = 7;
-    private const int COLUMNS = 6;
+    private const int ROWS = 6;
+    private const int COLUMNS = 7;
 
     private Cell[,] board = new Cell[ROWS, COLUMNS];
 
@@ -66,12 +67,230 @@ public class Connect4 : MonoBehaviour
 
     private void IAPlay()
     {
-        // code for the AI to play
-        PlaceCoin(Random.Range(0, 7));
+        int column = FindBestMove();
+        PlaceCoin(column);
 
         playingButtons.SetActive(true);
         alreadyPlayed = false;
     }
+
+    private int FindBestMove()
+    {
+        int bestScore = int.MinValue;
+        int bestColumn = 0;
+        int currentMove = 0;
+
+        for (int col = 0; col < COLUMNS; col++)
+        {
+            currentMove = FirstValidRowInCol(col);
+            Debug.Log(currentMove);
+            if (currentMove != -1)
+            {
+                // Simulate placing a coin in the current column
+                board[currentMove, col].PlaceColor(currentPlayer);
+                int score = Minimax(6, false); // Adjust the depth value as desired
+
+                //if(debug) Debug.Log("We check col " + col + " score is " +  score);
+
+                // Undo the move
+                board[currentMove, col].Clear();
+
+                // Update the best move if the current score is higher
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestColumn = col;
+                }
+            }
+        }
+
+        return bestColumn;
+    }
+
+    private int FirstValidRowInCol(int col)
+    {
+        for (int row = 0; row < ROWS; row++)
+        {
+            if (board[row, col].IsValid()) return row;
+        }
+        return -1;
+    }
+
+    private int Minimax(int depth, bool isMaximizingPlayer)
+    {
+        if (depth == 0 || CheckWin("Yellow") || CheckWin("Red"))
+        {
+            // Evaluate the board state and return the score
+            // Positive score favors the maximizing player (AI), negative score favors the minimizing player (player)
+            return EvaluateBoard();
+        }
+
+        if (isMaximizingPlayer)
+        {
+            int bestScore = int.MinValue;
+
+            for (int col = 0; col < COLUMNS; col++)
+            {
+                if (board[ROWS - 1, col].IsValid())
+                {
+                    // Simulate placing a coin in the current column
+                    int row = GetNextAvailableRow(col);
+                    board[row, col].PlaceColor(currentPlayer);
+                    int score = Minimax(depth - 1, false);
+
+                    // Undo the move
+                    board[row, col].Clear();
+
+                    // Update the best score if the current score is higher
+                    bestScore = Mathf.Max(bestScore, Mathf.Abs(score));
+                }
+            }
+
+            return bestScore;
+        }
+        else
+        {
+            int bestScore = int.MaxValue;
+
+            for (int col = 0; col < COLUMNS; col++)
+            {
+                if (board[ROWS - 1, col].IsValid())
+                {
+                    // Simulate placing a coin in the current column
+                    int row = GetNextAvailableRow(col);
+                    board[row, col].PlaceColor(GetOpponentPlayer());
+                    int score = Minimax(depth - 1, true);
+
+                    // Undo the move
+                    board[row, col].Clear();
+
+                    // Update the best score if the current score is lower
+                    bestScore = Mathf.Min(bestScore, score);
+                }
+            }
+
+            return bestScore;
+        }
+    }
+
+    private int GetNextAvailableRow(int col)
+    {
+        for (int row = 0; row < ROWS; row++)
+        {
+            if (board[row, col].IsValid())
+            {
+                return row;
+            }
+        }
+
+        return -1; // Column is full
+    }
+
+
+    private int EvaluateBoard()
+    {
+        // Add your own evaluation logic here to assign scores to different board states
+        // For simplicity, you can start with a basic scoring system based on the number of connected coins for each player
+
+        int score = 0;
+
+        // Evaluate horizontal connections
+        for (int row = 0; row < ROWS; row++)
+        {
+            for (int col = 0; col < COLUMNS - 3; col++)
+            {
+                score += EvaluateLine(row, col, 0, 1); // Evaluate right
+            }
+        }
+
+        // Evaluate vertical connections
+        for (int row = 0; row < ROWS - 3; row++)
+        {
+            for (int col = 0; col < COLUMNS; col++)
+            {
+                score += EvaluateLine(row, col, 1, 0); // Evaluate down
+            }
+        }
+
+        // Evaluate diagonal (ascending) connections
+        for (int row = 3; row < ROWS; row++)
+        {
+            for (int col = 0; col < COLUMNS - 3; col++)
+            {
+                score += EvaluateLine(row, col, -1, 1); // Evaluate ascending diagonal
+            }
+        }
+
+        // Evaluate diagonal (descending) connections
+        for (int row = 0; row < ROWS - 3; row++)
+        {
+            for (int col = 0; col < COLUMNS - 3; col++)
+            {
+                score += EvaluateLine(row, col, 1, 1); // Evaluate descending diagonal
+            }
+        }
+
+        return score;
+    }
+
+    private int EvaluateLine(int startRow, int startCol, int rowDirection, int colDirection)
+    {
+        int score = 0;
+        int playerCount = 0;
+        int opponentCount = 0;
+
+        for (int step = 0; step < 4; step++)
+        {
+            int row = startRow + step * rowDirection;
+            int col = startCol + step * colDirection;
+
+            string color = board[row, col].GetColor();
+
+            if (color == currentPlayer)
+            {
+                playerCount++;
+            }
+            else if (color == GetOpponentPlayer())
+            {
+                opponentCount++;
+            }
+        }
+
+        // Assign scores based on player and opponent counts
+        if (playerCount == 4)
+        {
+            score += 100; // AI wins
+        }
+        else if (playerCount == 3 && opponentCount == 0)
+        {
+            score += 5; // AI has three connected coins
+        }
+        else if (playerCount == 2 && opponentCount == 0)
+        {
+            score += 2; // AI has two connected coins
+        }
+        else if (opponentCount == 4)
+        {
+            score -= 100; // Player wins
+        }
+        else if (opponentCount == 3 && playerCount == 0)
+        {
+            score -= 4; // Player has three connected coins, block it
+        }
+        else if (opponentCount == 2 && playerCount == 0)
+        {
+            score -= 2; // Player has two connected coins, block it
+        }
+
+        return score;
+    }
+
+    private string GetOpponentPlayer()
+    {
+        return currentPlayer == "Yellow" ? "Red" : "Yellow";
+    }
+
+
 
     private Vector3 PositionIntToVector(int position)
     {
@@ -143,26 +362,26 @@ public class Connect4 : MonoBehaviour
     additionnaly it looks for the first valid row in the column to edit the board so the manager knows what's up
     keep in mind that the column selected is stored in the "row" of the array because it's driven by the X parameter.
     so if the names don't match it's normal*/
-    public void PlaceCoin(int row)
+    public void PlaceCoin(int col)
     {
-        int col = 0;
+        int row = 0;
 
-        if (!board[row, COLUMNS-1].IsValid()) return;
+        if (!board[ROWS-1, col].IsValid()) return;
 
-        for (int i = 0; i < COLUMNS; i++)
+        for (int i = 0; i < ROWS; i++)
         {
-            if(board[row, i].IsValid())
+            if(board[i, col].IsValid())
             {
-                col = i; // we store the Y parameter that is the first valid in the column to implement in the board
+                row = i; // we store the Y parameter that is the first valid in the column to implement in the board
                 break;
             }
         }
 
         // then we set the board accordingly and we spawn the object on the map
         board[row, col].PlaceColor(currentPlayer);
-        board[row, col].coin = SetCoinObject(currentPlayer, PositionIntToVector(row));
+        board[row, col].coin = SetCoinObject(currentPlayer, PositionIntToVector(col));
 
-        if (debug) DisplayBoard();
+        //if (debug) DisplayBoard();
 
         if (CheckWin(currentPlayer))
         {
