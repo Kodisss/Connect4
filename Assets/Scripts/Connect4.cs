@@ -70,6 +70,7 @@ public class Connect4 : MonoBehaviour
         }
     }
 
+    // starting point for the AI to play the game
     private void IAPlay()
     {
         int column = FindBestMove();
@@ -85,6 +86,7 @@ public class Connect4 : MonoBehaviour
         int bestColumn = 0;
         int currentMove = 0;
 
+        // goes through all columns to initiate the minimax algorythm
         for (int col = 0; col < COLUMNS; col++)
         {
             currentMove = FirstValidRowInCol(col);
@@ -194,9 +196,6 @@ public class Connect4 : MonoBehaviour
 
     private int EvaluateBoard()
     {
-        // Add your own evaluation logic here to assign scores to different board states
-        // For simplicity, you can start with a basic scoring system based on the number of connected coins for each player
-
         int score = 0;
 
         // Evaluate horizontal connections
@@ -244,6 +243,7 @@ public class Connect4 : MonoBehaviour
         int playerCount = 0;
         int opponentCount = 0;
 
+        // count the number of coins for you and the player
         for (int step = 0; step < 4; step++)
         {
             int row = startRow + step * rowDirection;
@@ -296,7 +296,7 @@ public class Connect4 : MonoBehaviour
     }
 
 
-
+    // convert the integer position to a 3D position to spawn the object
     private Vector3 PositionIntToVector(int position)
     {
         Vector3 result = new Vector3(-5.7f,6f,0f);
