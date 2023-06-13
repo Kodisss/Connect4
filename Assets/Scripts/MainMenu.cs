@@ -26,4 +26,9 @@ public class MainMenu : MonoBehaviour
         PlayerPrefs.Save();
         SceneManager.LoadScene("Connect4");
     }
+
+    public void SettingsScreen()
+    {
+        SceneManager.LoadScene("SettingsScreen");
+    }
 }

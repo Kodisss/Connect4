@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using UnityEngine.Windows;
 
 public class Connect4 : MonoBehaviour
 {
@@ -20,7 +21,9 @@ public class Connect4 : MonoBehaviour
     private string currentPlayer;
     private string winner;
     private string gameMode;
+
     private bool alreadyPlayed;
+    private int IADifficulty;
 
     private const int ROWS = 6;
     private const int COLUMNS = 7;
@@ -34,6 +37,8 @@ public class Connect4 : MonoBehaviour
     {
         currentPlayer = "Yellow";
         alreadyPlayed = false;
+        IADifficulty = (PlayerPrefs.GetInt("Difficulty") + 1) * 2;
+        Debug.Log("Difficulty = " + IADifficulty);
         gameMode = PlayerPrefs.GetString("GameMode");
         DisplayPlayer();
         InitializeBoard();
@@ -83,14 +88,14 @@ public class Connect4 : MonoBehaviour
         for (int col = 0; col < COLUMNS; col++)
         {
             currentMove = FirstValidRowInCol(col);
-            Debug.Log(currentMove);
+            if(debug) Debug.Log(currentMove);
             if (currentMove != -1)
             {
                 // Simulate placing a coin in the current column
                 board[currentMove, col].PlaceColor(currentPlayer);
-                int score = Minimax(6, false); // Adjust the depth value as desired
+                int score = Minimax(IADifficulty, false); // Adjust the depth value as desired
 
-                //if(debug) Debug.Log("We check col " + col + " score is " +  score);
+                if(debug) Debug.Log("We check col " + col + " score is " +  score);
 
                 // Undo the move
                 board[currentMove, col].Clear();
@@ -142,7 +147,7 @@ public class Connect4 : MonoBehaviour
                     board[row, col].Clear();
 
                     // Update the best score if the current score is higher
-                    bestScore = Mathf.Max(bestScore, Mathf.Abs(score));
+                    bestScore = Mathf.Max(bestScore, score);
                 }
             }
 
@@ -359,9 +364,7 @@ public class Connect4 : MonoBehaviour
     // Player input management
 
     /* this method takes the column in wich the player want to place a coin and places it.
-    additionnaly it looks for the first valid row in the column to edit the board so the manager knows what's up
-    keep in mind that the column selected is stored in the "row" of the array because it's driven by the X parameter.
-    so if the names don't match it's normal*/
+    additionnaly it looks for the first valid row in the column to edit the board so the manager knows what's up*/
     public void PlaceCoin(int col)
     {
         int row = 0;
